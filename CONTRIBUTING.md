@@ -12,7 +12,7 @@
 
 ### 报告 Bug
 
-如果您在使用本项目时遇到 Bug，请通过 [Issue Tracker](https://github.com/xiaomizhoubaobei/astrbot_plugin_treasure_bag_plugin/issues) 提交 Bug 报告。在提交报告时，请尽量提供详细的信息，包括：
+如果您在使用本项目时遇到 Bug，请通过 [Issue Tracker](https://github.com/xiaomizhoubaobei/meme-generator/issues) 提交 Bug 报告。在提交报告时，请尽量提供详细的信息，包括：
 
 *   您使用的操作系统和版本
 *   您使用的本项目版本
@@ -23,7 +23,7 @@
 
 ### 提交功能建议
 
-如果您对本项目有任何功能建议，请通过 [Issue Tracker](https://github.com/xiaomizhoubaobei/astrbot_plugin_treasure_bag_plugin/issues) 提交功能建议。在提交建议时，请尽量详细地描述您的想法，包括：
+如果您对本项目有任何功能建议，请通过 [Issue Tracker](https://github.com/xiaomizhoubaobei/meme-generator/issues) 提交功能建议。在提交建议时，请尽量详细地描述您的想法，包括：
 
 *   您想要添加的功能
 *   为什么您认为这个功能对本项目有价值
@@ -48,56 +48,70 @@
 
 要设置本地开发环境，请按照以下步骤操作：
 
-1.  确保您已安装 Python 3.7 或更高版本。
+1.  确保您已安装 Node.js 18 或更高版本。
 2.  克隆项目仓库：
 
     ```bash
-    git clone https://github.com/your-username/your-repository.git
-    cd your-repository
+    git clone https://github.com/xiaomizhoubaobei/meme-generator.git
+    cd meme-generator
     ```
 
-3.  创建并激活虚拟环境（推荐）：
+3.  安装项目依赖：
 
     ```bash
-    # 对于 venv
-    python -m venv .venv
-    # 在 Windows 上激活
-    .venv\Scripts\activate
-    # 在 macOS/Linux 上激活
-    source .venv/bin/activate
+    npm install
     ```
 
-4.  安装项目依赖：
+4.  构建TypeScript代码：
 
     ```bash
-    pip install -r requirements.txt
+    npm run build
     ```
 
-5.  （可选）安装开发和测试所需的额外依赖：
+5.  （可选）运行开发模式：
 
     ```bash
-    # 如果有 dev-requirements.txt 或类似的文件
-    # pip install -r dev-requirements.txt
+    # 开发模式运行CLI
+    npm run dev
     ```
 
 现在您应该已经成功设置了开发环境，可以开始进行修改和测试了。
 
 ## 编码规范
 
-本项目遵循 [PEP 8](https://www.python.org/dev/peps/pep-0008/) 编码规范。请确保您的代码符合 PEP 8 的要求。
+本项目遵循 TypeScript 和 JavaScript 的最佳实践。请确保您的代码符合项目的编码规范。
 
 **代码风格和命名约定：**
 
 *   请参考项目中现有的代码，尽量保持一致性。
-*   变量、函数和文件名使用 snake_case (例如: `my_variable`, `my_function`, `my_file.py`)。
-*   类名使用 CamelCase (例如: `MyClass`)。
-*   常量使用 ALL_CAPS (例如: `MY_CONSTANT`)。
+*   变量和函数名使用 camelCase (例如: `myVariable`, `myFunction`)。
+*   类名和接口名使用 PascalCase (例如: `MyClass`, `MyInterface`)。
+*   类型别名使用 PascalCase (例如: `MyType`)。
+*   常量使用 UPPER_SNAKE_CASE (例如: `MY_CONSTANT`)。
+*   文件名使用 kebab-case 或 camelCase (例如: `my-file.ts` 或 `myFile.ts`)。
 *   避免单字母变量名，除非在循环或数学表达式中。
 *   使用有意义的变量和函数名。
 
 **代码格式化和检查：**
 
-建议使用代码格式化工具（如 Black、autopep8）和代码检查工具（如 Flake8、Pylint）来帮助您遵循编码规范。
+项目已配置 ESLint 和 Prettier 进行代码格式化和检查：
+
+```bash
+# 代码检查
+npm run lint
+
+# 代码格式化
+npm run format
+```
+
+建议在提交代码前运行这些命令，确保代码符合规范。
+
+**TypeScript 特定规范：**
+
+*   使用 TypeScript 的类型系统，避免使用 `any` 类型。
+*   为所有函数、变量和类添加适当的类型注解。
+*   使用接口定义对象结构。
+*   使用枚举定义一组相关的常量。
 
 未来可能会创建更详细的编码风格指南文件。
 
