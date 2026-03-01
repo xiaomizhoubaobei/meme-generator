@@ -19,10 +19,10 @@ RUN apk add --no-cache \
     freetype-dev
 
 # Copy package files
-COPY package.json package-lock.json* ./
+COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production && \
+# Install all dependencies (including dev dependencies for building)
+RUN npm install && \
     npm cache clean --force
 
 # Copy source code
@@ -47,15 +47,16 @@ RUN apk add --no-cache \
     pixman \
     freetype \
     fontconfig \
-    fonts-noto-color-emoji \
     ttf-dejavu \
-    ttf-freefont
+    ttf-freefont \
+    tzdata && \
+    apk cache purge
 
 # Copy package files
-COPY package.json package-lock.json* ./
+COPY package*.json* ./
 
 # Install production dependencies only
-RUN npm ci --only=production && \
+RUN npm install --production && \
     npm cache clean --force
 
 # Copy built application
@@ -65,6 +66,13 @@ COPY --from=builder /app/node_modules ./node_modules
 # Copy resources
 COPY resources/fonts/* /usr/share/fonts/meme-fonts/
 RUN fc-cache -fv
+
+# Copy meme templates
+COPY src/memes /app/src/memes
+COPY src/config /app/src/config
+COPY src/types /app/src/types
+COPY src/utils /app/src/utils
+COPY src/core /app/src/core
 
 # Create logs directory
 RUN mkdir -p /app/logs
@@ -84,14 +92,15 @@ ENV TZ=Asia/Shanghai \
     BAIDU_TRANS_APIKEY="" \
     LOG_LEVEL="INFO" \
     SERVER_HOST="0.0.0.0" \
-    SERVER_PORT=2233
+    SERVER_PORT=8080 \
+    RESOURCE_URL=""
 
 # Expose port
-EXPOSE 2233
+EXPOSE 8080
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD node -e "require('http').get('http://localhost:2233/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+    CMD node -e "require('http').get('http://localhost:8080/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
 # Start the application
-CMD ["node", "dist/cli.js", "run"]
+CMD ["node", "dist/app.js"]

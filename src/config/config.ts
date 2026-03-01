@@ -67,7 +67,7 @@ const DEFAULT_CONFIG: Config = {
   },
   server: {
     host: '0.0.0.0',
-    port: 2233,
+    port: 8080,
   },
   log: {
     log_level: 'INFO',
