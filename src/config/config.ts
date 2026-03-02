@@ -82,6 +82,17 @@ function getConfigFilePath(): string {
   return path.join(configDir, 'config.toml');
 }
 
+function readSecretFromFile(filePath: string): string | null {
+  try {
+    if (filePath && fs.existsSync(filePath)) {
+      return fs.readFileSync(filePath, 'utf-8').trim();
+    }
+  } catch (error) {
+    console.error(`Failed to read secret file: ${filePath}`, error);
+  }
+  return null;
+}
+
 function parseEnvValue(value: string): any {
   if (value.startsWith('[') && value.endsWith(']')) {
     try {
@@ -130,11 +141,25 @@ function loadFromEnv(): Partial<Config> {
       ...DEFAULT_CONFIG.translate,
       baidu_trans_appid: process.env.BAIDU_TRANS_APPID,
     };
+  } else if (process.env.BAIDU_TRANS_APPID_FILE) {
+    const appid = readSecretFromFile(process.env.BAIDU_TRANS_APPID_FILE);
+    if (appid) {
+      env.translate = {
+        ...DEFAULT_CONFIG.translate,
+        baidu_trans_appid: appid,
+      };
+    }
   }
 
   if (process.env.BAIDU_TRANS_APIKEY) {
     env.translate = env.translate || { ...DEFAULT_CONFIG.translate };
     env.translate.baidu_trans_apikey = process.env.BAIDU_TRANS_APIKEY;
+  } else if (process.env.BAIDU_TRANS_APIKEY_FILE) {
+    const apikey = readSecretFromFile(process.env.BAIDU_TRANS_APIKEY_FILE);
+    if (apikey) {
+      env.translate = env.translate || { ...DEFAULT_CONFIG.translate };
+      env.translate.baidu_trans_apikey = apikey;
+    }
   }
 
   if (process.env.SERVER_HOST) {
@@ -174,8 +199,7 @@ function loadFromFile(): Partial<Config> {
 
   try {
     const content = fs.readFileSync(configPath, 'utf-8');
-    const parsed = toml.parse(content) as Partial<Config>;
-    return parsed;
+    return  toml.parse(content) as Partial<Config>;
   } catch (error) {
     console.error(`Failed to load config file: ${error}`);
     return {};

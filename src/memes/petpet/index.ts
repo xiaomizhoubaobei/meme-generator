@@ -17,11 +17,11 @@ const memeFn: MemeFunction = async (
 ): Promise<Buffer> => {
   const img = images[0];
   const { width, height } = await img.getSize();
-  
+
   // Create a simple animation-like effect by resizing the image
   const frames: Buffer[] = [];
   const sizes = [0.9, 0.8, 0.7, 0.8, 0.9];
-  
+
   for (const scale of sizes) {
     const w = Math.floor(width * scale);
     const h = Math.floor(height * scale);
@@ -30,20 +30,15 @@ const memeFn: MemeFunction = async (
     const frame = await clonedImg.toBuffer();
     frames.push(frame);
   }
-  
+
   // For now, just return the first frame (simplified version)
   return frames[0];
 };
 
 export function register(): void {
-  addMeme(
-    'petpet',
-    memeFn,
-    params,
-    {
-      keywords: ['petpet', '摸摸'],
-      shortcuts: [],
-      tags: new Set(['popular']),
-    }
-  );
+  addMeme('petpet', memeFn, params, {
+    keywords: ['petpet', '摸摸'],
+    shortcuts: [],
+    tags: new Set(['popular']),
+  });
 }

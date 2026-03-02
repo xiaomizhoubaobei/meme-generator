@@ -5,6 +5,8 @@
  */
 
 const http = require('http');
+const fs = require('fs');
+const path = require('path');
 
 const BASE_URL = 'http://localhost:8080';
 
@@ -29,6 +31,8 @@ async function benchmark() {
         }
     ];
 
+    const results = [];
+
     for (const test of tests) {
         console.log(`📊 测试中: ${test.name}`);
         const times = [];
@@ -48,9 +52,19 @@ async function benchmark() {
         console.log(`  最小值: ${min}ms`);
         console.log(`  最大值: ${max}ms`);
         console.log(`  P95: ${p95}ms\n`);
+
+        // 添加到结果列表（使用 P95 作为基准值）
+        results.push({
+            name: `${test.name} (P95)`,
+            value: p95,
+            unit: 'ms'
+        });
     }
 
-    console.log('✅ 基准测试完成!');
+    // 保存基准测试结果到 JSON 文件
+    const outputPath = path.join(__dirname, 'benchmark-results.json');
+    fs.writeFileSync(outputPath, JSON.stringify(results, null, 2));
+    console.log(`✅ 基准测试完成! 结果已保存到 ${outputPath}`);
 }
 
 function makeRequest(path) {

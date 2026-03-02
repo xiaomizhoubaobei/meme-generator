@@ -17,12 +17,12 @@ const memeFn: MemeFunction = async (
 ): Promise<Buffer> => {
   const img = images[0];
   const { height } = await img.getSize();
-  
+
   // Make the image grayscale and darker
   const result = await img.clone().grayscale();
   await result.contrast(0.5);
   await result.brightness(0.7);
-  
+
   // Add RIP text
   await result.drawText('R.I.P.', {
     font: 'Arial',
@@ -31,19 +31,14 @@ const memeFn: MemeFunction = async (
     x: 20,
     y: height / 2,
   });
-  
+
   return result.toBuffer();
 };
 
 export function register(): void {
-  addMeme(
-    'rip',
-    memeFn,
-    params,
-    {
-      keywords: ['rip', '安息'],
-      shortcuts: [],
-      tags: new Set(['popular']),
-    }
-  );
+  addMeme('rip', memeFn, params, {
+    keywords: ['rip', '安息'],
+    shortcuts: [],
+    tags: new Set(['popular']),
+  });
 }

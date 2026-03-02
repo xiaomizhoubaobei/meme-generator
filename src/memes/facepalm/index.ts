@@ -17,12 +17,12 @@ const memeFn: MemeFunction = async (
 ): Promise<Buffer> => {
   const img = images[0];
   const { width, height } = await img.getSize();
-  
+
   // Create a facepalm effect with darkness
   const result = await img.clone().grayscale();
   await result.brightness(0.6);
   await result.contrast(1.2);
-  
+
   // Add a dark overlay on the face area (simplified)
   const darkOverlay = await createImage(width, height / 2, {
     r: 0,
@@ -31,7 +31,7 @@ const memeFn: MemeFunction = async (
     alpha: 0.5,
   });
   await result.overlay(darkOverlay, 0, 0);
-  
+
   // Add "🤦" text (facepalm emoji)
   await result.drawText('🤦', {
     font: 'Arial',
@@ -40,19 +40,14 @@ const memeFn: MemeFunction = async (
     x: width / 2 - 30,
     y: height / 2 - 30,
   });
-  
+
   return result.toBuffer();
 };
 
 export function register(): void {
-  addMeme(
-    'facepalm',
-    memeFn,
-    params,
-    {
-      keywords: ['facepalm', '扶额'],
-      shortcuts: [],
-      tags: new Set(['popular']),
-    }
-  );
+  addMeme('facepalm', memeFn, params, {
+    keywords: ['facepalm', '扶额'],
+    shortcuts: [],
+    tags: new Set(['popular']),
+  });
 }

@@ -1,15 +1,15 @@
 #!/bin/sh
 
-# Health check script for meme-generator
-# Returns 0 if healthy, 1 if unhealthy
+# meme-generator 的健康检查脚本
+# 健康时返回 0，不健康时返回 1
 
 HEALTH_URL="${HEALTH_URL:-http://localhost:2233/health}"
 
-# Try to connect to the health endpoint
+# 尝试连接健康检查端点
 if curl -f -s -o /dev/null "$HEALTH_URL"; then
-    echo "Health check passed"
+    echo "健康检查通过"
     exit 0
 else
-    echo "Health check failed"
+    echo "健康检查失败"
     exit 1
 fi

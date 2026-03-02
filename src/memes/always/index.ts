@@ -18,13 +18,13 @@ const memeFn: MemeFunction = async (
   const img = images[0];
   const { width, height } = await img.getSize();
   const text = texts[0] || 'Always';
-  
+
   // Create a new image with text
   const result = await createImage(width + 200, height, 'white');
-  
+
   // Paste the original image
   await result.paste(img, 0, 0);
-  
+
   // Add text on the right side
   await result.drawText(text, {
     font: 'Arial',
@@ -33,19 +33,14 @@ const memeFn: MemeFunction = async (
     x: width + 20,
     y: height / 2 - 20,
   });
-  
+
   return result.toBuffer();
 };
 
 export function register(): void {
-  addMeme(
-    'always',
-    memeFn,
-    params,
-    {
-      keywords: ['always', '总是'],
-      shortcuts: [],
-      tags: new Set(['popular']),
-    }
-  );
+  addMeme('always', memeFn, params, {
+    keywords: ['always', '总是'],
+    shortcuts: [],
+    tags: new Set(['popular']),
+  });
 }

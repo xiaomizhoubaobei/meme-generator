@@ -17,11 +17,11 @@ const memeFn: MemeFunction = async (
 ): Promise<Buffer> => {
   const img = images[0];
   const { width, height } = await img.getSize();
-  
+
   // Create a dance effect with colorful overlays
   const result = img.clone();
   await result.hueRotate(90);
-  
+
   // Add colorful circles (disco lights effect)
   const colors = [
     { r: 255, g: 0, b: 0, alpha: 0.3 },
@@ -29,7 +29,7 @@ const memeFn: MemeFunction = async (
     { r: 0, g: 0, b: 255, alpha: 0.3 },
     { r: 255, g: 255, b: 0, alpha: 0.3 },
   ];
-  
+
   const circleSize = Math.min(width, height) / 5;
   for (let i = 0; i < colors.length; i++) {
     const circle = await createImage(circleSize, circleSize, colors[i]);
@@ -38,7 +38,7 @@ const memeFn: MemeFunction = async (
     const y = height - circleSize - 10;
     await result.overlay(circle, x, y);
   }
-  
+
   // Add "💃" text (dance emoji)
   await result.drawText('💃', {
     font: 'Arial',
@@ -47,19 +47,14 @@ const memeFn: MemeFunction = async (
     x: width / 2 - 30,
     y: 10,
   });
-  
+
   return result.toBuffer();
 };
 
 export function register(): void {
-  addMeme(
-    'dance',
-    memeFn,
-    params,
-    {
-      keywords: ['dance', '跳舞'],
-      shortcuts: [],
-      tags: new Set(['popular']),
-    }
-  );
+  addMeme('dance', memeFn, params, {
+    keywords: ['dance', '跳舞'],
+    shortcuts: [],
+    tags: new Set(['popular']),
+  });
 }

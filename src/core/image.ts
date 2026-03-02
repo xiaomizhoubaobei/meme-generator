@@ -99,15 +99,13 @@ export class BuildImage {
     blend: sharp.Blend = 'over'
   ): Promise<BuildImage> {
     const overlayBuffer = await overlay.toPng();
-    this.instance = this.instance.composite([{ input: overlayBuffer, left: x, top: y, blend }]);
+    this.instance = this.instance.composite([
+      { input: overlayBuffer, left: x, top: y, blend },
+    ]);
     return this;
   }
 
-  async paste(
-    paste: BuildImage,
-    x: number = 0,
-    y: number = 0
-  ): Promise<BuildImage> {
+  async paste(paste: BuildImage, x: number = 0, y: number = 0): Promise<BuildImage> {
     const pasteBuffer = await paste.toPng();
     this.instance = this.instance.composite([{ input: pasteBuffer, left: x, top: y }]);
     return this;
@@ -156,7 +154,9 @@ export class BuildImage {
       </svg>
     `;
     const circleBuffer = Buffer.from(circleSvg);
-    this.instance = this.instance.composite([{ input: circleBuffer, blend: 'dest-in' }]);
+    this.instance = this.instance.composite([
+      { input: circleBuffer, blend: 'dest-in' },
+    ]);
     return this;
   }
 
@@ -240,7 +240,7 @@ export async function createImage(
       channels: 4,
       background: color,
     },
-  }).toBuffer();
+  }).png().toBuffer();
   return new BuildImage(buffer);
 }
 

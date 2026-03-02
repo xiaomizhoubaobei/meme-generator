@@ -69,9 +69,7 @@ export function hasMeme(key: string): boolean {
   return _memes.has(key);
 }
 
-export async function loadMemeFromModule(
-  modulePath: string
-): Promise<void> {
+export async function loadMemeFromModule(modulePath: string): Promise<void> {
   try {
     const resolvedPath = path.resolve(modulePath);
     if (!fs.existsSync(resolvedPath)) {
@@ -81,7 +79,7 @@ export async function loadMemeFromModule(
 
     // Dynamic import of the module
     const module = await import(resolvedPath);
-    
+
     // Check if the module exports a register function
     if (typeof module.register === 'function') {
       module.register();
@@ -101,7 +99,7 @@ export async function loadMemesFromDirectory(dirPath: string): Promise<void> {
   }
 
   const files = fs.readdirSync(dirPath);
-  
+
   for (const file of files) {
     if (file.startsWith('_') || file.startsWith('.')) {
       continue;

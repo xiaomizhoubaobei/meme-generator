@@ -54,7 +54,10 @@ export interface MemeGeneratorException extends Error {
 
 export class ImageNumberMismatch extends Error implements MemeGeneratorException {
   status_code = 400;
-  constructor(public min_images: number, public max_images: number) {
+  constructor(
+    public min_images: number,
+    public max_images: number
+  ) {
     super(`Image number mismatch: expected ${min_images}~${max_images}`);
     this.name = 'ImageNumberMismatch';
   }
@@ -62,7 +65,10 @@ export class ImageNumberMismatch extends Error implements MemeGeneratorException
 
 export class TextNumberMismatch extends Error implements MemeGeneratorException {
   status_code = 400;
-  constructor(public min_texts: number, public max_texts: number) {
+  constructor(
+    public min_texts: number,
+    public max_texts: number
+  ) {
     super(`Text number mismatch: expected ${min_texts}~${max_texts}`);
     this.name = 'TextNumberMismatch';
   }

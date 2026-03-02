@@ -32,13 +32,32 @@ initializeMemes().catch((error) => {
 
 // GET /meme/version
 app.get('/meme/version', (_req: Request, res: Response) => {
+  logger.info('GET /meme/version');
   res.json({ version: '0.0.1' });
 });
 
 // GET /memes/keys
 app.get('/memes/keys', (_req: Request, res: Response) => {
-  const keys = getMemes().map((m) => m.key);
-  res.json(keys);
+  logger.info('GET /memes/keys');
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const seconds = String(now.getSeconds()).padStart(2, '0');
+  
+  const memes = getMemes();
+  const keysWithNames = memes.map((m) => ({
+    key: m.key,
+    keywords: m.keywords,
+  }));
+
+  res.json({
+    version: '0.0.1',
+    time: `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`,
+    keys: keysWithNames
+  });
 });
 
 // GET /memes/:key/info
@@ -46,6 +65,7 @@ app.get(
   '/memes/:key/info',
   asyncHandler(async (req: Request, res: Response) => {
     const { key } = req.params;
+    logger.info(`GET /memes/${key}/info`);
     const meme = getMeme(key);
 
     res.json({
@@ -65,6 +85,7 @@ app.get(
   '/memes/:key/preview',
   asyncHandler(async (req: Request, res: Response) => {
     const { key } = req.params;
+    logger.info(`GET /memes/${key}/preview`);
     const meme = getMeme(key);
 
     // Generate preview with default images and texts
@@ -74,7 +95,7 @@ app.get(
     // Generate random images for preview
     for (let i = 0; i < meme.params_type.min_images; i++) {
       const buffer = Buffer.from(
-        `<svg width="200" height="200"><rect width="200" height="200" fill="#${Math.floor(Math.random()*16777215).toString(16)}"/></svg>`
+        `<svg width="200" height="200"><rect width="200" height="200" fill="#${Math.floor(Math.random() * 16777215).toString(16)}"/></svg>`
       );
       images.push(new BuildImage(buffer));
     }
@@ -103,20 +124,53 @@ app.post(
   asyncHandler(async (req: Request, res: Response) => {
     const { key } = req.params;
     const files = req.files as Express.Multer.File[];
+    logger.info(`POST /memes/${key}`);
+
+    // Type safety check: ensure files is an array
+    if (!Array.isArray(files)) {
+      logger.warn(`Invalid files parameter for /memes/${key}`);
+      res.status(400).json({ error: 'Invalid files parameter: expected an array' });
+      return;
+    }
+
+    // Type safety check: ensure each file has a buffer
+    for (const file of files) {
+      if (!file || !file.buffer) {
+        logger.warn(`Invalid file for /memes/${key}: missing buffer`);
+        res.status(400).json({ error: 'Invalid file: missing buffer' });
+        return;
+      }
+    }
+
+    // Ensure files is typed as array for type safety
+    const validatedFiles: Express.Multer.File[] = files;
+
     const texts = req.body.texts
       ? Array.isArray(req.body.texts)
         ? req.body.texts
         : [req.body.texts]
       : [];
+
+    // Type safety check: ensure texts is an array
+    if (!Array.isArray(texts)) {
+      logger.warn(`Invalid texts parameter for /memes/${key}`);
+      res.status(400).json({ error: 'Invalid texts parameter: expected an array' });
+      return;
+    }
+
+    // Ensure texts is typed as array for type safety
+    const validatedTexts: string[] = texts;
+
     const args = req.body.args ? JSON.parse(req.body.args) : {};
 
     const meme = getMeme(key);
 
     // Validate image count
     if (
-      meme.params_type.min_images > files.length ||
-      files.length > meme.params_type.max_images
+      meme.params_type.min_images > validatedFiles.length ||
+      validatedFiles.length > meme.params_type.max_images
     ) {
+      logger.warn(`Image count mismatch for /memes/${key}: expected ${meme.params_type.min_images}~${meme.params_type.max_images}`);
       res.status(400).json({
         error: `Image count mismatch: expected ${meme.params_type.min_images}~${meme.params_type.max_images}`,
       });
@@ -125,9 +179,10 @@ app.post(
 
     // Validate text count
     if (
-      meme.params_type.min_texts > texts.length ||
-      texts.length > meme.params_type.max_texts
+      meme.params_type.min_texts > validatedTexts.length ||
+      validatedTexts.length > meme.params_type.max_texts
     ) {
+      logger.warn(`Text count mismatch for /memes/${key}: expected ${meme.params_type.min_texts}~${meme.params_type.max_texts}`);
       res.status(400).json({
         error: `Text count mismatch: expected ${meme.params_type.min_texts}~${meme.params_type.max_texts}`,
       });
@@ -136,13 +191,26 @@ app.post(
 
     // Load images
     const images: BuildImage[] = [];
-    for (const file of files) {
+    for (const file of validatedFiles) {
       images.push(new BuildImage(file.buffer));
     }
 
     // Generate meme
-    const result = await meme.function(images, texts, args);
-    const contentType = 'image/png';
+    const result = await meme.function(images, validatedTexts, args);
+    logger.info(`Successfully generated meme for /memes/${key}`);
+    
+    // Detect image format based on magic bytes
+    let contentType = 'image/png';
+    if (result.length >= 2) {
+      // JPEG starts with FF D8
+      if (result[0] === 0xFF && result[1] === 0xD8) {
+        contentType = 'image/jpeg';
+      }
+      // PNG starts with 89 50 4E 47
+      else if (result[0] === 0x89 && result[1] === 0x50 && result[2] === 0x4E && result[3] === 0x47) {
+        contentType = 'image/png';
+      }
+    }
 
     res.set('Content-Type', contentType);
     res.send(result);
@@ -151,11 +219,13 @@ app.post(
 
 // Health check
 app.get('/health', (_req: Request, res: Response) => {
+  logger.info('GET /health');
   res.json({ status: 'ok', memes_count: getMemes().length });
 });
 
 // API Documentation
 app.get('/docs', (_req: Request, res: Response) => {
+  logger.info('GET /docs');
   res.json({
     name: 'Meme Generator API',
     version: '0.0.1',
@@ -166,21 +236,26 @@ app.get('/docs', (_req: Request, res: Response) => {
         method: 'GET',
         description: '获取API版本信息',
         response: {
-          version: 'API版本号'
-        }
+          version: 'API版本号',
+        },
       },
       {
         path: '/memes/keys',
         method: 'GET',
-        description: '获取所有可用的表情包键值',
-        response: ['表情包键值列表']
+        description: '获取所有可用的表情包键值和中文名称',
+        response: [
+          {
+            key: '表情包键值',
+            keywords: ['关键词列表（包含中文）'],
+          },
+        ],
       },
       {
         path: '/memes/:key/info',
         method: 'GET',
         description: '获取特定表情包的详细信息',
         parameters: {
-          ':key': '表情包键值'
+          ':key': '表情包键值',
         },
         response: {
           key: '表情包键值',
@@ -189,31 +264,31 @@ app.get('/docs', (_req: Request, res: Response) => {
           shortcuts: '快捷方式列表',
           tags: '标签集合',
           date_created: '创建日期',
-          date_modified: '修改日期'
-        }
+          date_modified: '修改日期',
+        },
       },
       {
         path: '/memes/:key/preview',
         method: 'GET',
         description: '获取表情包预览图',
         parameters: {
-          ':key': '表情包键值'
+          ':key': '表情包键值',
         },
-        response: '预览图像'
+        response: '预览图像',
       },
       {
         path: '/memes/:key',
         method: 'POST',
         description: '生成表情包',
         parameters: {
-          ':key': '表情包键值'
+          ':key': '表情包键值',
         },
         requestBody: {
           images: '图片文件数组（multipart/form-data）',
           texts: '文本数组（可选）',
-          args: '附加参数（JSON格式，可选）'
+          args: '附加参数（JSON格式，可选）',
         },
-        response: '生成的表情包图像'
+        response: '生成的表情包图像',
       },
       {
         path: '/health',
@@ -221,23 +296,34 @@ app.get('/docs', (_req: Request, res: Response) => {
         description: '健康检查',
         response: {
           status: '服务器状态',
-          memes_count: '表情包总数'
-        }
+          memes_count: '表情包总数',
+        },
       },
       {
         path: '/docs',
         method: 'GET',
         description: '获取API文档',
-        response: 'API文档信息'
-      }
+        response: 'API文档信息',
+      },
     ],
     examples: {
-      '获取所有表情包': {
+      获取所有表情包: {
         method: 'GET',
         url: '/memes/keys',
-        response: ['always', 'slap', 'rip', 'kiss', 'punch', 'shock', 'thumbsup', 'facepalm', 'dance', 'petpet']
+        response: [
+          'always',
+          'slap',
+          'rip',
+          'kiss',
+          'punch',
+          'shock',
+          'thumbsup',
+          'facepalm',
+          'dance',
+          'petpet',
+        ],
       },
-      '获取特定表情包信息': {
+      获取特定表情包信息: {
         method: 'GET',
         url: '/memes/always/info',
         response: {
@@ -247,25 +333,25 @@ app.get('/docs', (_req: Request, res: Response) => {
             max_images: 1,
             min_texts: 0,
             max_texts: 0,
-            default_texts: []
+            default_texts: [],
           },
           keywords: ['always'],
           shortcuts: [],
           tags: ['funny'],
           date_created: '2023-01-01',
-          date_modified: '2023-01-02'
-        }
+          date_modified: '2023-01-02',
+        },
       },
-      '生成表情包': {
+      生成表情包: {
         method: 'POST',
         url: '/memes/always',
         formData: {
           images: '<image_file>',
           texts: '["text1", "text2"]',
-          args: '{"size": 500}'
-        }
-      }
-    }
+          args: '{"size": 500}',
+        },
+      },
+    },
   });
 });
 
@@ -295,7 +381,7 @@ export function startServer(): void {
   });
 }
 
-// 如果此文件是主模块，则启动服务器
+// Start the server if this file is the main module
 if (require.main === module) {
   startServer();
 }

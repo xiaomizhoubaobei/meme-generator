@@ -17,17 +17,17 @@ const memeFn: MemeFunction = async (
 ): Promise<Buffer> => {
   const img = images[0];
   const { width, height } = await img.getSize();
-  
+
   // Create a shocked effect with color inversion and shake lines
   const result = await img.clone().hueRotate(180);
   await result.contrast(1.5);
-  
+
   // Add shock lines (simple jagged lines)
   for (let i = 0; i < 5; i++) {
     const line = await createImage(10, height, { r: 255, g: 255, b: 0, alpha: 0.7 });
     await result.overlay(line, width - 20, 0);
   }
-  
+
   // Add "!" symbols
   await result.drawText('!', {
     font: 'Arial',
@@ -36,19 +36,14 @@ const memeFn: MemeFunction = async (
     x: width / 2 - 10,
     y: 10,
   });
-  
+
   return result.toBuffer();
 };
 
 export function register(): void {
-  addMeme(
-    'shock',
-    memeFn,
-    params,
-    {
-      keywords: ['shock', '震惊'],
-      shortcuts: [],
-      tags: new Set(['popular']),
-    }
-  );
+  addMeme('shock', memeFn, params, {
+    keywords: ['shock', '震惊'],
+    shortcuts: [],
+    tags: new Set(['popular']),
+  });
 }
