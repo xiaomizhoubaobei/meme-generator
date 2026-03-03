@@ -1,0 +1,5 @@
+name: "CodeQL 配置"
+
+# 忽略百度翻译 API 签名中的 MD5 使用（这是 API 官方要求）
+queries:
+  - exclude: py/weak-sensitive-data-hashing

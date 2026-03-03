@@ -373,6 +373,8 @@ def translate(text: str, lang_from: str = "auto", lang_to: str = "zh") -> str:
         )
     salt = str(round(time.time() * 1000))
     sign_raw = appid + text + salt + apikey
+    # MD5 是百度翻译 API 官方要求的签名算法，用于 API 请求验证
+    # 参考: https://fanyi-api.baidu.com/doc/21
     sign = hashlib.md5(sign_raw.encode("utf8")).hexdigest()
     params = {
         "q": text,
