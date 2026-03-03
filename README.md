@@ -3,6 +3,20 @@
 ![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)
 ![License](https://img.shields.io/badge/License-AGPL--3.0-orange.svg)
 ![Docker](https://img.shields.io/badge/Docker-Multi--platform-blue?logo=docker)
+![GitHub Repo stars](https://img.shields.io/github/stars/xiaomizhoubaobei/meme-generator)
+![GitHub forks](https://img.shields.io/github/forks/xiaomizhoubaobei/meme-generator)
+![GitHub watchers](https://img.shields.io/github/watchers/xiaomizhoubaobei/meme-generator)
+[![GitHub issues](https://img.shields.io/github/issues/xiaomizhoubaobei/meme-generator)](https://github.com/xiaomizhoubaobei/meme-generator/issues)
+[![GitHub license](https://img.shields.io/github/license/xiaomizhoubaobei/meme-generator)](https://github.com/xiaomizhoubaobei/meme-generator/blob/main/LICENSE)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/xiaomizhoubaobei/meme-generator)](https://github.com/xiaomizhoubaobei/meme-generator/releases)
+[![Commit Activity](https://img.shields.io/github/commit-activity/w/xiaomizhoubaobei/meme-generator)](https://github.com/xiaomizhoubaobei/meme-generator)
+![GitHub last commit](https://img.shields.io/github/last-commit/xiaomizhoubaobei/meme-generator)
+![GitHub contributors](https://img.shields.io/github/contributors/xiaomizhoubaobei/meme-generator)
+![Python Version](https://img.shields.io/badge/Python-3.12+-blue.svg)
+![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)
+![Status](https://img.shields.io/badge/status-active-success.svg)
+![Code Review](https://img.shields.io/badge/code_review-100%25-brightgreen.svg)
+![Repo Size](https://img.shields.io/github/repo-size/xiaomizhoubaobei/meme-generator.svg)
 
 这是一个功能强大的 Python 表情包生成器服务，提供丰富的表情包模板和灵活的图像处理功能。支持通过 CLI 命令行工具和 RESTful API 两种方式使用，方便集成到各种应用场景中。
 
@@ -122,7 +136,7 @@ poetry shell
 ```bash
 docker pull qixiaoxin/meme-generator:latest
 # 或指定版本
-docker pull qixiaoxin/meme-generator:0.0.1
+docker pull qixiaoxin/meme-generator:0.0.2
 ```
 
 #### 从 GitHub Container Registry 拉取
@@ -130,7 +144,7 @@ docker pull qixiaoxin/meme-generator:0.0.1
 ```bash
 docker pull ghcr.io/xiaomizhoubaobei/meme-generator:latest
 # 或指定版本
-docker pull ghcr.io/xiaomizhoubaobei/meme-generator:0.0.1
+docker pull ghcr.io/xiaomizhoubaobei/meme-generator:0.0.2
 ```
 
 #### 从阿里云容器注册表拉取
@@ -138,7 +152,7 @@ docker pull ghcr.io/xiaomizhoubaobei/meme-generator:0.0.1
 ```bash
 docker pull crpi-wk2d8umombj539de.cn-shanghai.personal.cr.aliyuncs.com/xmz-1/meme-generator:latest
 # 或指定版本
-docker pull crpi-wk2d8umombj539de.cn-shanghai.personal.cr.aliyuncs.com/xmz-1/meme-generator:0.0.1
+docker pull crpi-wk2d8umombj539de.cn-shanghai.personal.cr.aliyuncs.com/xmz-1/meme-generator:0.0.2
 ```
 
 #### 运行容器
@@ -184,8 +198,8 @@ docker login
 docker push qixiaoxin/meme-generator:latest
 
 # 推送指定版本
-docker tag qixiaoxin/meme-generator:latest qixiaoxin/meme-generator:0.0.1
-docker push qixiaoxin/meme-generator:0.0.1
+docker tag qixiaoxin/meme-generator:latest qixiaoxin/meme-generator:0.0.2
+docker push qixiaoxin/meme-generator:0.0.2
 ```
 
 ## 启动服务
