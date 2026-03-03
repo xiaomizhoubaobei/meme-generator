@@ -112,8 +112,6 @@ jobs:
             org.opencontainers.image.httpx=${{ steps.deps.outputs.HTTPX_VERSION }}
             org.opencontainers.image.fastapi=${{ steps.deps.outputs.FASTAPI_VERSION }}
             org.opencontainers.image.pillow=${{ steps.deps.outputs.PILLOW_VERSION }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
           provenance: true
 
       - name: 安装 cosign
