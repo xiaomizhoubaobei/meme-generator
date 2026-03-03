@@ -80,7 +80,7 @@ jobs:
         with:
           images: |
             ${{ secrets.DOCKERHUB_USERNAME }}/meme-generator
-            ghcr.io/${{ github.repository }}/meme-generator
+            ghcr.io/${{ github.repository }}
             crpi-wk2d8umombj539de.cn-shanghai.personal.cr.aliyuncs.com/xmz-1/meme-generator
           flavor: |
             latest=false
