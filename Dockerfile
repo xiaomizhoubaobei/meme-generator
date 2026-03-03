@@ -59,10 +59,6 @@ RUN apk add --no-cache \
 # 复制 package 文件
 COPY package*.json* ./
 
-# 仅安装生产依赖
-RUN npm install --production && \
-    npm cache clean --force
-
 # 复制构建好的应用
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
