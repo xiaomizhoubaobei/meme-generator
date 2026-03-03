@@ -6,10 +6,11 @@ RUN curl -sSL https://install.python-poetry.org | python -
 
 ENV PATH="${PATH}:/root/.local/bin"
 
-COPY ./pyproject.toml ./poetry.lock* /tmp/
+COPY ./pyproject.toml ./poetry.lock /tmp/
 
 RUN poetry self add poetry-plugin-export \
-  && poetry export -f requirements.txt --output requirements.txt --without-hashes
+  && poetry export -f requirements.txt --output requirements.txt --without-hashes \
+  && rm poetry.lock
 
 FROM python:3.10-slim-bookworm AS app
 
