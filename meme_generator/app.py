@@ -1,4 +1,5 @@
 import json
+import uuid
 from datetime import datetime
 from typing import Any, Literal, Optional
 
@@ -20,6 +21,9 @@ from meme_generator.utils import MemeProperties, render_meme_list, run_sync
 from meme_generator.version import __version__
 
 app = FastAPI()
+
+# 图像缓存字典，用于存储预览图像
+image_cache: dict[str, bytes] = {}
 
 
 class MemeArgsResponse(BaseModel):
@@ -140,6 +144,42 @@ def register_routers():
     def _():
         return get_meme_keys()
 
+    @app.get("/meme/infos")
+    def _():
+        memes_info = []
+        for meme in get_memes():
+            args_type_response = None
+            if args_type := meme.params_type.args_type:
+                args_model = args_type.args_model
+                args_type_response = MemeArgsResponse(
+                    args_model=model_json_schema(args_model),
+                    args_examples=[
+                        model_dump(example) for example in args_type.args_examples
+                    ],
+                    parser_options=args_type.parser_options,
+                )
+
+            params = {
+                "min_images": meme.params_type.min_images,
+                "max_images": meme.params_type.max_images,
+                "min_texts": meme.params_type.min_texts,
+                "max_texts": meme.params_type.max_texts,
+                "default_texts": meme.params_type.default_texts,
+                "args_type": args_type_response,
+            }
+
+            meme_info = {
+                "key": meme.key,
+                "params": params,
+                "keywords": meme.keywords,
+                "shortcuts": meme.shortcuts,
+                "tags": meme.tags,
+                "date_created": meme.date_created,
+                "date_modified": meme.date_modified,
+            }
+            memes_info.append(meme_info)
+        return memes_info
+
     @app.get("/memes/{key}/info")
     def _(key: str):
         try:
@@ -184,8 +224,48 @@ def register_routers():
             raise HTTPException(status_code=e.status_code, detail=e.message)
 
         content = result.getvalue()
+        # 生成唯一图像 ID
+        image_id = str(uuid.uuid4())
+        # 存储图像数据到缓存
+        image_cache[image_id] = content
+        # 返回包含图像 ID 的 JSON 对象
+        return {"image_id": image_id}
+
+    @app.get("/image/{image_id}")
+    def _(image_id: str):
+        """根据图像 ID 获取实际图像数据"""
+        if image_id not in image_cache:
+            raise HTTPException(status_code=404, detail="Image not found or expired")
+
+        content = image_cache[image_id]
         media_type = str(filetype.guess_mime(content)) or "text/plain"
         return Response(content=content, media_type=media_type)
+
+    @app.get("/meme/search")
+    def _(query: str, include_tags: bool = False):
+        """搜索表情包，根据关键词和可选的标签进行匹配"""
+        if not query:
+            raise HTTPException(status_code=400, detail="Query parameter is required")
+
+        query_lower = query.lower()
+        matched_keys = []
+
+        for meme in get_memes():
+            # 检查关键词匹配
+            keyword_match = any(query_lower in keyword.lower() for keyword in meme.keywords)
+
+            # 检查标签匹配（如果包含标签）
+            tag_match = False
+            if include_tags:
+                tag_match = any(query_lower in tag.lower() for tag in meme.tags)
+
+            # 检查键值匹配
+            key_match = query_lower in meme.key.lower()
+
+            if keyword_match or tag_match or key_match:
+                matched_keys.append(meme.key)
+
+        return matched_keys
 
     for meme in sorted(get_memes(), key=lambda meme: meme.key):
         register_router(meme)
