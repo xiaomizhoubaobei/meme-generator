@@ -64,6 +64,7 @@ jobs:
           context: .
           platforms: linux/amd64
           push: true
+          output: type=docker
           tags: |
             swr.cn-east-3.myhuaweicloud.com/qixiaoxin/meme-generator:${{ steps.version.outputs.VERSION }}-amd64
             swr.cn-east-3.myhuaweicloud.com/qixiaoxin/meme-generator:latest-amd64
@@ -133,6 +134,7 @@ jobs:
           context: .
           platforms: linux/arm64
           push: true
+          output: type=docker
           tags: |
             swr.cn-east-3.myhuaweicloud.com/qixiaoxin/meme-generator:${{ steps.version.outputs.VERSION }}-arm64
             swr.cn-east-3.myhuaweicloud.com/qixiaoxin/meme-generator:latest-arm64
