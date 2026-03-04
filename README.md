@@ -113,6 +113,16 @@ sudo apt install fonts-noto-color-emoji
 | PangMenZhengDao-Cu | 庞门正道粗书体.ttf | ace_attorney_dialog | |
 | Neo Sans | Neo Sans Bold.ttf | intel_inside | |
 
+### 🐳 推荐：使用 Docker（最简单的方式）
+
+我们强烈推荐使用 Docker 来运行本项目，因为它具有以下优点：
+- **简单快捷**：无需配置 Python 环境和依赖库
+- **环境隔离**：避免依赖冲突和环境配置问题
+- **多平台支持**：支持 amd64/arm64 架构，适配不同硬件平台
+- **一致性**：开发、测试、生产环境保持一致
+
+跳转到 [Docker 使用](#docker-使用) 部分查看详细的 Docker 部署说明。
+
 ### 使用 Poetry 安装
 
 ```bash
@@ -136,7 +146,7 @@ poetry shell
 ```bash
 docker pull qixiaoxin/meme-generator:latest
 # 或指定版本
-docker pull qixiaoxin/meme-generator:0.0.2
+docker pull qixiaoxin/meme-generator:0.0.3
 ```
 
 #### 从 GitHub Container Registry 拉取
@@ -144,7 +154,7 @@ docker pull qixiaoxin/meme-generator:0.0.2
 ```bash
 docker pull ghcr.io/xiaomizhoubaobei/meme-generator:latest
 # 或指定版本
-docker pull ghcr.io/xiaomizhoubaobei/meme-generator:0.0.2
+docker pull ghcr.io/xiaomizhoubaobei/meme-generator:0.0.3
 ```
 
 #### 从阿里云容器注册表拉取
@@ -152,7 +162,7 @@ docker pull ghcr.io/xiaomizhoubaobei/meme-generator:0.0.2
 ```bash
 docker pull crpi-wk2d8umombj539de.cn-shanghai.personal.cr.aliyuncs.com/xmz-1/meme-generator:latest
 # 或指定版本
-docker pull crpi-wk2d8umombj539de.cn-shanghai.personal.cr.aliyuncs.com/xmz-1/meme-generator:0.0.2
+docker pull crpi-wk2d8umombj539de.cn-shanghai.personal.cr.aliyuncs.com/xmz-1/meme-generator:0.0.3
 ```
 
 #### 运行容器
@@ -181,25 +191,6 @@ docker run -p 8080:8080 -e HOST=0.0.0.0 -e PORT=8080 ghcr.io/xiaomizhoubaobei/me
 
 # 阿里云容器注册表镜像
 docker run -p 8080:8080 -e HOST=0.0.0.0 -e PORT=8080 crpi-wk2d8umombj539de.cn-shanghai.personal.cr.aliyuncs.com/xmz-1/meme-generator:latest
-```
-
-#### 推送到 DockerHub
-
-如果您想构建并推送到 DockerHub：
-
-```bash
-# 构建镜像
-docker build -t qixiaoxin/meme-generator:latest .
-
-# 登录 DockerHub
-docker login
-
-# 推送镜像
-docker push qixiaoxin/meme-generator:latest
-
-# 推送指定版本
-docker tag qixiaoxin/meme-generator:latest qixiaoxin/meme-generator:0.0.2
-docker push qixiaoxin/meme-generator:0.0.2
 ```
 
 ## 启动服务
