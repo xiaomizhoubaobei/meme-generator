@@ -144,6 +144,29 @@ def register_routers():
     def _():
         return get_meme_keys()
 
+    @app.get("/list")
+    def _():
+        """获取所有meme的列表（包含基本信息）"""
+        memes = []
+        for meme in get_memes():
+            meme_info = {
+                "key": meme.key,
+                "keywords": meme.keywords,
+                "tags": list(meme.tags),
+                "shortcuts": [shortcut.model_dump() for shortcut in meme.shortcuts],
+                "params": {
+                    "min_images": meme.params_type.min_images,
+                    "max_images": meme.params_type.max_images,
+                    "min_texts": meme.params_type.min_texts,
+                    "max_texts": meme.params_type.max_texts,
+                    "default_texts": meme.params_type.default_texts
+                },
+                "date_created": meme.date_created.isoformat(),
+                "date_modified": meme.date_modified.isoformat()
+            }
+            memes.append(meme_info)
+        return memes
+
     @app.get("/meme/infos")
     def _():
         memes_info = []
