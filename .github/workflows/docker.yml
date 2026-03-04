@@ -114,14 +114,12 @@ jobs:
           COSIGN_EXPERIMENTAL: "1"
         run: |
           echo "使用 cosign 无密钥模式签名镜像..."
-          # 只对非华为云的镜像进行签名
+          # 只对支持签名的镜像仓库进行签名（排除阿里云容器镜像服务）
           images_to_sign=(
             "${{ secrets.DOCKERHUB_USERNAME }}/meme-generator:${{ steps.version.outputs.VERSION }}"
             "${{ secrets.DOCKERHUB_USERNAME }}/meme-generator:latest"
             "ghcr.io/${{ github.repository }}:${{ steps.version.outputs.VERSION }}"
             "ghcr.io/${{ github.repository }}:latest"
-            "crpi-wk2d8umombj539de.cn-shanghai.personal.cr.aliyuncs.com/xmz-1/meme-generator:${{ steps.version.outputs.VERSION }}"
-            "crpi-wk2d8umombj539de.cn-shanghai.personal.cr.aliyuncs.com/xmz-1/meme-generator:latest"
           )
 
           for img in "${images_to_sign[@]}"; do

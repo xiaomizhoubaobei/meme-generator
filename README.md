@@ -231,6 +231,12 @@ docker run -p 8000:8000 crpi-wk2d8umombj539de.cn-shanghai.personal.cr.aliyuncs.c
 | BAIDU_TRANS_APIKEY | `''` | 百度翻译 apikey |
 | LOG_LEVEL | `'INFO'` | 日志等级 |
 
+⚠️ **重要提示：端口变更**
+- **0.0.3 版本及以后**：默认使用端口 `8000`
+- **0.0.3 版本以前**：默认使用端口 `2233`
+
+如果要兼容旧版，请在启动时指定端口映射 `-p 2233:8000`。
+
 使用环境变量示例：
 
 ```bash
