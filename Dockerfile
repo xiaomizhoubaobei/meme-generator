@@ -16,7 +16,7 @@ FROM python:3.10-slim-bookworm AS app
 
 WORKDIR /app
 
-EXPOSE 2233
+EXPOSE 8000
 
 VOLUME /data
 

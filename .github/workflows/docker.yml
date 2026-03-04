@@ -61,6 +61,13 @@ jobs:
           username: ${{ secrets.ALIYUN_REGISTRY_USERNAME }}
           password: ${{ secrets.ALIYUN_REGISTRY_PASSWORD }}
 
+      - name: 登录华为云 SWR
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
+        with:
+          registry: swr.cn-east-3.myhuaweicloud.com
+          username: ${{ secrets.SWR_USERNAME }}
+          password: ${{ secrets.SWR_PASSWORD }}
+
       - name: 提取依赖版本
         id: deps
         run: |
@@ -82,6 +89,7 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/meme-generator
             ghcr.io/${{ github.repository }}
             crpi-wk2d8umombj539de.cn-shanghai.personal.cr.aliyuncs.com/xmz-1/meme-generator
+            swr.cn-east-3.myhuaweicloud.com/qixiaoxin/meme-generator
           flavor: |
             latest=false
           tags: |
@@ -144,4 +152,20 @@ jobs:
           subject-name: ghcr.io/${{ github.repository }}/meme-generator
           subject-digest: ${{ steps.build.outputs.digest }}
           push-to-registry: true
+
+      - name: 构建摘要信息
+        run: |
+          echo "🎉 镜像构建完成！"
+          echo ""
+          echo "📦 已推送的镜像："
+          while IFS= read -r tag; do
+              echo "  - $tag"
+          done <<< "${{ steps.meta.outputs.tags }}"
+          echo ""
+          echo "🔑 镜像摘要："
+          echo "  ${{ steps.build.outputs.digest }}"
+          echo ""
+          echo "🐳 拉取命令示例："
+          echo "  docker pull swr.cn-east-3.myhuaweicloud.com/qixiaoxin/meme-generator:${{ steps.version.outputs.VERSION }}"
+          echo "  docker pull swr.cn-east-3.myhuaweicloud.com/qixiaoxin/meme-generator:latest"
 
