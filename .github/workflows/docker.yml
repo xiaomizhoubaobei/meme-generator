@@ -20,7 +20,7 @@ permissions:
   artifact-metadata: write
 
 jobs:
-  build-and-push:
+  build-and-push-main:
     runs-on: ubuntu-latest
     steps:
       - name: 加固运行器（审计所有出站调用）
@@ -61,13 +61,6 @@ jobs:
           username: ${{ secrets.ALIYUN_REGISTRY_USERNAME }}
           password: ${{ secrets.ALIYUN_REGISTRY_PASSWORD }}
 
-      - name: 登录华为云 SWR
-        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
-        with:
-          registry: swr.cn-east-3.myhuaweicloud.com
-          username: ${{ secrets.SWR_USERNAME }}
-          password: ${{ secrets.SWR_PASSWORD }}
-
       - name: 提取依赖版本
         id: deps
         run: |
@@ -81,29 +74,20 @@ jobs:
           echo "PILLOW_VERSION=$PILLOW_VERSION" >> $GITHUB_OUTPUT
           echo "Python: $PYTHON_VERSION, httpx: $HTTPX_VERSION, fastapi: $FASTAPI_VERSION, Pillow: $PILLOW_VERSION"
 
-      - name: Docker 元数据（主流容器注册表）
-        id: meta
-        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5.10.0
-        with:
-          images: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/meme-generator
-            ghcr.io/${{ github.repository }}
-            crpi-wk2d8umombj539de.cn-shanghai.personal.cr.aliyuncs.com/xmz-1/meme-generator
-            swr.cn-east-3.myhuaweicloud.com/qixiaoxin/meme-generator
-          flavor: |
-            latest=false
-          tags: |
-            type=raw,value=${{ steps.version.outputs.VERSION }}
-            type=raw,value=latest,enable={{is_default_branch}}
-
       - name: 构建并推送（主流容器注册表，支持 OCI）
-        id: build
+        id: build-main
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
         with:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/meme-generator:${{ steps.version.outputs.VERSION }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/meme-generator:latest
+            ghcr.io/${{ github.repository }}:${{ steps.version.outputs.VERSION }}
+            ghcr.io/${{ github.repository }}:latest
+            crpi-wk2d8umombj539de.cn-shanghai.personal.cr.aliyuncs.com/xmz-1/meme-generator:${{ steps.version.outputs.VERSION }}
+            crpi-wk2d8umombj539de.cn-shanghai.personal.cr.aliyuncs.com/xmz-1/meme-generator:latest
           labels: |
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
             org.opencontainers.image.description=用于制作趣味图片的 Python API 服务
@@ -130,27 +114,33 @@ jobs:
           COSIGN_EXPERIMENTAL: "1"
         run: |
           echo "使用 cosign 无密钥模式签名镜像..."
-          while IFS= read -r tag; do
-              if [[ "$tag" == *"crpi-"* ]]; then
-                  echo "跳过阿里云 ACR 镜像: $tag"
-                  continue
-              fi
-              echo "正在签名 $tag"
-              cosign sign --yes "$tag"
-          done <<< "${{ steps.meta.outputs.tags }}"
+          # 只对非华为云的镜像进行签名
+          images_to_sign=(
+            "${{ secrets.DOCKERHUB_USERNAME }}/meme-generator:${{ steps.version.outputs.VERSION }}"
+            "${{ secrets.DOCKERHUB_USERNAME }}/meme-generator:latest"
+            "ghcr.io/${{ github.repository }}:${{ steps.version.outputs.VERSION }}"
+            "ghcr.io/${{ github.repository }}:latest"
+            "crpi-wk2d8umombj539de.cn-shanghai.personal.cr.aliyuncs.com/xmz-1/meme-generator:${{ steps.version.outputs.VERSION }}"
+            "crpi-wk2d8umombj539de.cn-shanghai.personal.cr.aliyuncs.com/xmz-1/meme-generator:latest"
+          )
+
+          for img in "${images_to_sign[@]}"; do
+            echo "正在签名 $img"
+            cosign sign --yes "$img"
+          done
 
       - name: 证明 DockerHub 镜像
         uses: actions/attest-build-provenance@96278af6caaf10aea03fd8d33a09a777ca52d62f # v3.2.0
         with:
-          subject-name: index.docker.io/${{ secrets.DOCKERHUB_USERNAME }}
-          subject-digest: ${{ steps.build.outputs.digest }}
+          subject-name: index.docker.io/${{ secrets.DOCKERHUB_USERNAME }}/meme-generator
+          subject-digest: ${{ steps.build-main.outputs.digest }}
           push-to-registry: true
 
       - name: 证明 GHCR 镜像
         uses: actions/attest-build-provenance@96278af6caaf10aea03fd8d33a09a777ca52d62f # v3.2.0
         with:
           subject-name: ghcr.io/${{ github.repository }}/meme-generator
-          subject-digest: ${{ steps.build.outputs.digest }}
+          subject-digest: ${{ steps.build-main.outputs.digest }}
           push-to-registry: true
 
       - name: 构建摘要信息
@@ -158,14 +148,12 @@ jobs:
           echo "🎉 镜像构建完成！"
           echo ""
           echo "📦 已推送的镜像："
-          while IFS= read -r tag; do
-              echo "  - $tag"
-          done <<< "${{ steps.meta.outputs.tags }}"
+          echo "  - ${{ secrets.DOCKERHUB_USERNAME }}/meme-generator:${{ steps.version.outputs.VERSION }}"
+          echo "  - ${{ secrets.DOCKERHUB_USERNAME }}/meme-generator:latest"
+          echo "  - ghcr.io/${{ github.repository }}:${{ steps.version.outputs.VERSION }}"
+          echo "  - ghcr.io/${{ github.repository }}:latest"
+          echo "  - crpi-wk2d8umombj539de.cn-shanghai.personal.cr.aliyuncs.com/xmz-1/meme-generator:${{ steps.version.outputs.VERSION }}"
+          echo "  - crpi-wk2d8umombj539de.cn-shanghai.personal.cr.aliyuncs.com/xmz-1/meme-generator:latest"
           echo ""
           echo "🔑 镜像摘要："
-          echo "  ${{ steps.build.outputs.digest }}"
-          echo ""
-          echo "🐳 拉取命令示例："
-          echo "  docker pull swr.cn-east-3.myhuaweicloud.com/qixiaoxin/meme-generator:${{ steps.version.outputs.VERSION }}"
-          echo "  docker pull swr.cn-east-3.myhuaweicloud.com/qixiaoxin/meme-generator:latest"
-
+          echo "  ${{ steps.build-main.outputs.digest }}"
